@@ -87991,9 +87991,10 @@ async function exportBuilds() {
     }
     configureAndroidExport();
     if (!USE_GODOT_3) {
-        // Because of plugin and engine bugs we need to import twice to settle things
+        // Because of plugin and engine bugs we need to import multiple times
         await importProject1();
         await importProject2();
+        await importProject3();
     }
     const results = await doExport();
     core.endGroup();
@@ -88327,7 +88328,7 @@ async function importProject1() {
     core.startGroup('🎲 Import project (1st try)');
     // this import tends to fail on MacOS for some reason (exit code 1), but a fail here doesn't necessarily mean the export will fail
     try {
-        await (0,exec.exec)(godotExecutablePath, [GODOT_PROJECT_FILE_PATH, '--headless', '-e', '--quit-after', '600']);
+        await (0,exec.exec)(godotExecutablePath, [GODOT_PROJECT_FILE_PATH, '--headless', '-e', '--quit-after', '1200']);
     }
     catch (error) {
         core.warning(`Import appears to have failed. Continuing anyway, but exports may fail. ${error}`);
@@ -88339,7 +88340,19 @@ async function importProject2() {
     core.startGroup('🎲 Import project (2nd try)');
     // this import tends to fail on MacOS for some reason (exit code 1), but a fail here doesn't necessarily mean the export will fail
     try {
-        await (0,exec.exec)(godotExecutablePath, [GODOT_PROJECT_FILE_PATH, '--headless', '-e', '--quit-after', '600']);
+        await (0,exec.exec)(godotExecutablePath, [GODOT_PROJECT_FILE_PATH, '--headless', '-e', '--quit-after', '1200']);
+    }
+    catch (error) {
+        core.warning(`Import appears to have failed. Continuing anyway, but exports may fail. ${error}`);
+    }
+    core.endGroup();
+}
+/** Open the editor in headless mode once, to import all assets, creating the `.godot` directory if it doesn't exist. */
+async function importProject3() {
+    core.startGroup('🎲 Import project (3rd try)');
+    // this import tends to fail on MacOS for some reason (exit code 1), but a fail here doesn't necessarily mean the export will fail
+    try {
+        await (0,exec.exec)(godotExecutablePath, [GODOT_PROJECT_FILE_PATH, '--headless', '-e', '--quit-after', '1200']);
     }
     catch (error) {
         core.warning(`Import appears to have failed. Continuing anyway, but exports may fail. ${error}`);
